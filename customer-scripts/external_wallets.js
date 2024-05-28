@@ -14,7 +14,7 @@ const fireblocks = new FireblocksSDK(apiSecret, apiKey, baseUrl);
 
 //IMPORTANT: CHANGE THESE VALUES TO THE RELEVANT NEW FILES
 const outputCsv = './external-matic-addresses.csv';
-const inputCsv = '../random_eth.csv';
+const inputCsv = '../eth_example_input.csv';
 
 // Write the header once
 const header = 'id,address,name,uuid,amount\n';
