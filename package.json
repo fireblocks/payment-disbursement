@@ -1,0 +1,30 @@
+{
+  "name": "invictus_disbursement",
+  "version": "1.0.0",
+  "description": "Scripts to help invictus hash disbursement via Fireblocks API",
+  "main": "csv.js",
+  "scripts": {
+    "whitelist": "node customer-scripts/external_wallets.js",
+    "workflow": "node customer-scripts/create_payments_workflow.js",
+    "launch": "node customer-scripts/create-and-launch-flows.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fireblocks/payment-disbursement.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fireblocks/payment-disbursement/issues"
+  },
+  "homepage": "https://github.com/fireblocks/payment-disbursement#readme",
+  "type": "module",
+  "dependencies": {
+    "express": "^4.18.2",
+    "p-limit": "^3.1.0",
+    "fireblocks-sdk": "latest",
+    "axios": "latest",
+    "csv-parser": "latest"
+  }
+}

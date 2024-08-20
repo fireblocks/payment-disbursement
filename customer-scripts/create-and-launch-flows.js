@@ -15,8 +15,6 @@ const fireblocks = new FireblocksSDK(privateKey, apiKey, baseUrl);
 const workflowCsv = "./workflows.csv";
 const preScreening = { enabled: false };
 
-// const workflowCsv = 'path/to/your/workflow.csv'; // Update with your CSV file path
-
 const checkStatusAndLaunch = async (executionId) => {
   return new Promise((resolve, reject) => {
     const interval = setInterval(async () => {

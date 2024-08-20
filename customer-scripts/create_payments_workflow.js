@@ -16,14 +16,14 @@ const sourceVaultId = "9";
 const addresses = [];
 
 // UPDATE TO A UNIQUE NAME
-const configName = "eric-ba";
+const configName = "invictus-small-test";
 
 // Read the CSV file containing IDs
 //REPLACE WITH INPUT
-const inputCsv = "./external-matic-addresses.csv";
+const inputCsv = "./invictus-addresses.csv";
 
 //REPLACE WITH OUTPUT CSV FILE
-const outputInstructionSetCsv = "output-check.csv";
+const outputInstructionSetCsv = "output-matic.csv";
 const outputWorkflowsCsv = "workflows.csv"
 
 const batchSize = 200; // Number of rows per batch
@@ -34,7 +34,7 @@ const writeStream = fs.createWriteStream(outputInstructionSetCsv, { flags: 'a' }
 const writeWorkflowStream = fs.createWriteStream(outputWorkflowsCsv, { flags: 'a'});
 
 // Write header to CSV file once
-writeStream.write('Address,Wallet ID, Name + UUID, Asset ID,Amount, Workflow\n');
+writeStream.write('Address,Wallet ID, Name, Asset ID,Amount, Workflow\n');
 writeWorkflowStream.write('workflowId,name\n');
 
 const processBatchQueue = [];
@@ -48,7 +48,7 @@ const processBatchQueue = [];
           "accountId": row.id,
           "accountType": "UNMANAGED_WALLET",
         },
-        "assetId": "AMOY_POLYGON_TEST",
+        "assetId": "USDC_AMOY_POLYGON_TEST_7WWV",
         "amount": row.amount
       });
 

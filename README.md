@@ -19,6 +19,9 @@ DisplayName | uuid | asset | deposit_address | amount
 hedgefund  cbc5bebf-2d63-4d99-ba7e-0c6ad6116e0e  ETH 0x0000000001 0.01          
 ```
 
+Set up API Cosigner, with TAP rule in place to authorize signing and initiating a tx. 
+Set up Admin Quorum with rules in place to approve whitelisting wallets. Fix the quorum to be 1 so that we can approve without manually signing, as there are a ton of wallets to whitelist
+
 ### Step 1: Whitelist External Wallets
 Fireblocks PS runs “Create User Wallets” scripts which calls Create External Wallet API to *whitelist* wallets by
 looping thru csv 
@@ -33,7 +36,7 @@ const inputCsv = '../random_eth.csv';
 usage:
 `node customer-scripts/external_wallets.js`
 
-Result will be an output CSV with the following format:
+Result will be an output CSV with the following format: in invictus-addresses.csv
 ```
 id,address,name,uuid,amount
 4a625b91-0a49-4931-8607-7c67d8fddc58,0x0a1bd3c44800b838a1cbe44703f222564ec2cd14,Jovial_Hedgehog_819.7581218219924,f3d1c5ca-3c4f-436b-88d0-84d5166ce55b,0.001
@@ -45,8 +48,6 @@ Fireblocks PS runs a Create Workflow script (script 3) -
 which calls /workflow-config API under the hood
 
 ### Create Workflow Execution
-1. create workflow execution in Postman
-POST workflow-execution ID to initiate TransformStream
 
 Usage: 
 
