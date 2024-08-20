@@ -31,7 +31,7 @@ const inputCsv = '../random_eth.csv';
 ```
 
 usage:
-`node customer_scripts/external_wallets.js`
+`node customer-scripts/external_wallets.js`
 
 Result will be an output CSV with the following format:
 ```
@@ -79,3 +79,10 @@ Note the execution ID, and pass into:
 2. POST /payments/workflow-execution/{execution-id}/actions/execute
 
 Should execute and launch workflow.
+
+## Notes
+
+8.7.24
+Hash invictus has sent us the csv files for disbursement. There are four, with a total of:
+650 + 350 + 5300 + 2500 => 9k 
+

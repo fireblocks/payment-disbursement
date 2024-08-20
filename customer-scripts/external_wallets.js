@@ -5,7 +5,7 @@ const { exit } = require('process');
 const { inspect } = require('util');
 const csv = require('csv-parser');
 
-const apiSecret = fs.readFileSync(path.resolve("../../fireblocks-secret-key.key"), "utf8");
+const apiSecret = fs.readFileSync(path.resolve("../fireblocks-secret-key.key"), "utf8");
 const apiKey = "b4ea3e01-bbdc-4c6b-a4bc-dd2143ded3ab"
 
 // Choose the right api url for your workspace type 
@@ -14,10 +14,10 @@ const fireblocks = new FireblocksSDK(apiSecret, apiKey, baseUrl);
 
 //IMPORTANT: CHANGE THESE VALUES TO THE RELEVANT NEW FILES
 const outputCsv = './external-matic-addresses.csv';
-const inputCsv = '../eth_example_input.csv';
+const inputCsv = './invictus-test-1.csv';
 
 // Write the header once
-const header = 'id,address,name,uuid,amount\n';
+const header = 'id,address,name,uuid,amount,tag\n';
 fs.writeFileSync(outputCsv, header, 'utf8');
 
 (async () => {
@@ -32,7 +32,9 @@ fs.writeFileSync(outputCsv, header, 'utf8');
 
             console.log("adding asset to external wallet: ");
             console.log(externalWalletId, asset_type, address);
-            const addAsset = await createExternalWalletAsset(externalWalletId, asset_type, address);
+            const tag = `${uuid}, ${name}`;
+
+            const addAsset = await createExternalWalletAsset(externalWalletId, asset_type, address, tag);
             console.log(addAsset);
 
         } catch (error) {
@@ -76,7 +78,7 @@ async function output_csv(workflow, outputCsv) {
     }
 }
 
-async function createExternalWalletAsset(walletId, assetId, address){
-    const externalWalletAsset = await fireblocks.createExternalWalletAsset(walletId, assetId, address);
+async function createExternalWalletAsset(walletId, assetId, address, tag){
+    const externalWalletAsset = await fireblocks.createExternalWalletAsset(walletId, assetId, address, tag);
     console.log(JSON.stringify(externalWalletAsset, null, 2));
 }
