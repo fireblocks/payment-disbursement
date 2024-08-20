@@ -8,7 +8,7 @@ const { FireblocksSDK } = require('fireblocks-sdk');
 // Load your private key from a file
 // REPLACE KEYS WITH YOURS BELOW
 const privateKey = fs.readFileSync('../fireblocks-secret-key.key');
-const apiKey = "b4ea3e01-bbdc-4c6b-a4bc-dd2143ded3ab";
+const apiKey = process.env.API_KEY;
 const baseUrl = "https://api.fireblocks.io";
 const fireblocks = new FireblocksSDK(privateKey, apiKey, baseUrl);
 const sourceVaultId = "9";
@@ -16,7 +16,7 @@ const sourceVaultId = "9";
 const addresses = [];
 
 // UPDATE TO A UNIQUE NAME
-const configName = "invictus-small-test";
+const configName = "invictus-big-test";
 
 // Read the CSV file containing IDs
 //REPLACE WITH INPUT

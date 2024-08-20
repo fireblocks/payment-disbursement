@@ -7,7 +7,7 @@ import { inspect } from 'util';              // Built-in Node.js module
 import csv from 'csv-parser';   
 
 const apiSecret = fs.readFileSync(path.resolve("../fireblocks-secret-key.key"), "utf8");
-const apiKey = "b4ea3e01-bbdc-4c6b-a4bc-dd2143ded3ab"
+const apiKey = process.env.API_KEY
 
 // Choose the right api url for your workspace type 
 const baseUrl = "https://api.fireblocks.io";

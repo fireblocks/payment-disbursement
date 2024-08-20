@@ -44,11 +44,11 @@ d63dbaf6-0e9f-41b2-af7c-b81ef38e47a9,0x3dd2adf5e9c42cfbd8e295648d4ee1b16b74e2ee,
 ```
 
 ### Step 2: Create Payment Workflow with wallet IDs
-Fireblocks PS runs a Create Workflow script (script 3) - 
-which calls /workflow-config API under the hood
+Use the previous CSV to create a payment workflow. It'll create workflow instruction sets, in batches of 200. (calls /workflow-config API under the hood).
+_Note:_ we can review the output csv to make sure that all external wallets have been successfully created, by ensuring there's no N/A entries. Also, larger csv files may result in the admin approval process taking a bit longer. One way to check this is to ensure that the prompts from the mobile console disappear.
+
 
 ### Create Workflow Execution
-
 Usage: 
 
 `node customer-scripts/create_payments_workflow.js`
@@ -65,10 +65,11 @@ Output/Result:
 - output CSV is in format:
 
 ```
-Address,Wallet ID,Asset ID,Amount
-0x0a1bd3c44800b838a1cbe44703f222564ec2cd14,4a625b91-0a49-4931-8607-7c67d8fddc58,AMOY_POLYGON_TEST,0.001
+Address,Wallet ID,Asset ID,Amount,Workflow Name
+0x0a1bd3c44800b838a1cbe44703f222564ec2cd14,4a625b91-0a49-4931-8607-7c67d8fddc58,USDC_TEST,0.001,disbursement-1
 ```
 
+This is the final CSV we will review before executing the payment disbursement.
 ### Step 3. Create and Execute Flow Execution
 
 Take Workflow Config ID in Postman Collection:
@@ -80,10 +81,3 @@ Note the execution ID, and pass into:
 2. POST /payments/workflow-execution/{execution-id}/actions/execute
 
 Should execute and launch workflow.
-
-## Notes
-
-8.7.24
-Hash invictus has sent us the csv files for disbursement. There are four, with a total of:
-650 + 350 + 5300 + 2500 => 9k 
-
