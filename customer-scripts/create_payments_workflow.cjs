@@ -4,30 +4,33 @@ const csv = require('csv-parser');
 // const jwt = require('jsonwebtoken');
 // const crypto = require('crypto');
 const { FireblocksSDK } = require('fireblocks-sdk');
+require('dotenv').config();
 
 // Load your private key from a file
 // REPLACE KEYS WITH YOURS BELOW
 const privateKey = fs.readFileSync('../fireblocks-secret-key.key');
 const apiKey = process.env.API_KEY;
+
 const baseUrl = "https://api.fireblocks.io";
-const fireblocks = new FireblocksSDK(privateKey, apiKey, baseUrl);
+const fireblocks = new FireblocksSDK(privateKey, apiKey, baseUrl, undefined, { timeoutInMs: 30000} );
 const sourceVaultId = "9";
 
 const addresses = [];
 
 // UPDATE TO A UNIQUE NAME
-const configName = "invictus-big-test";
+const configName = "invictus-giga-test";
 
 // Read the CSV file containing IDs
 //REPLACE WITH INPUT
 const inputCsv = "./invictus-addresses.csv";
 
 //REPLACE WITH OUTPUT CSV FILE
-const outputInstructionSetCsv = "output-matic.csv";
+const outputInstructionSetCsv = "output-test-matic.csv";
 const outputWorkflowsCsv = "workflows.csv"
 
 const batchSize = 200; // Number of rows per batch
 let configCounter = 1; // Counter to increment config name
+const addressMap = {};  // New variable to store address and name by accountId
 
 let disburseArray = [];
 const writeStream = fs.createWriteStream(outputInstructionSetCsv, { flags: 'a' });
@@ -39,17 +42,28 @@ writeWorkflowStream.write('workflowId,name\n');
 
 const processBatchQueue = [];
 
+// Ensure the method exists
+if (typeof fireblocks.createWorkflowConfig !== 'function') {
+  console.error('createWorkflowConfig is not defined in FireblocksSDK');
+}
+
 (async () => {
   fs.createReadStream(inputCsv)
     .pipe(csv())
     .on('data', (row) => {
+      // Store address and name in addressMap
+      addressMap[row.id] = {
+        address: row.address,
+        name: row.name
+      };
+
       disburseArray.push({
         "payeeAccount": {
           "accountId": row.id,
           "accountType": "UNMANAGED_WALLET",
         },
         "assetId": "USDC_AMOY_POLYGON_TEST_7WWV",
-        "amount": row.amount
+        "amount": row.amount,
       });
 
       if (disburseArray.length === batchSize) {
@@ -105,18 +119,13 @@ async function output_csv(jsonData, workflowName) {
   const csvRows = await Promise.all(instructionSet.map(async (instruction) => {
     const walletId = instruction.payeeAccount.accountId || 'N/A';
     const assetId = instruction.assetId || 'N/A';
+    const address = addressMap[walletId]?.address || 'N/A';
+    const tag = addressMap[walletId]?.name || 'N/A';
+    const amount = instruction.amount || 'N/A';
     
-    try {
-      const result = await fireblocks.getExternalWalletAsset(walletId, assetId);
-      const address = result.address;
-      const tag = result.tag
-      const amount = instruction.amount || 'N/A';
-      return `${address},${walletId},${tag},${assetId},${amount},${workflowName}`;
-    } catch (error) {
-      console.error('Error fetching address:', error);
-      return `N/A,${walletId},N/A,${assetId},N/A,${workflowName}`;
-    }
+    return `${address},${walletId},${tag},${assetId},${amount},${workflowName}`;
+    
   }));
-  
-  return csvRows.join("\n"); // Return the CSV rows joined by OS-specific newlines
+
+  return csvRows.join("\n");
 }

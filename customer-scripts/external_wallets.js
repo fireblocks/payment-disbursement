@@ -14,8 +14,8 @@ const baseUrl = "https://api.fireblocks.io";
 const fireblocks = new FireblocksSDK(apiSecret, apiKey, baseUrl);
 
 //IMPORTANT: CHANGE THESE VALUES TO THE RELEVANT NEW FILES
-const outputCsv = './invictus-addresses.csv';
-const inputCsv = './invictus-big-1.csv';
+const outputCsv = './invictus-preview.csv';
+const inputCsv = './iba-small.csv';
 
 // Write the header once
 const header = 'id,address,name,uuid,amount\n';
@@ -95,7 +95,7 @@ async function createExternalWalletAsset(walletId, assetId, address, tag) {
 
         const externalWalletId = await createExternalWallet(name, address, uuid, amount);
         console.log("Adding asset to external wallet:", externalWalletId, asset_type, address);
-
+        sleep(5000);
         await createExternalWalletAsset(externalWalletId, asset_type, address, name);
 
         processedRows++;
@@ -114,3 +114,8 @@ async function createExternalWalletAsset(walletId, assetId, address, tag) {
             console.log('CSV file processed successfully');
         });
 })();
+
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
