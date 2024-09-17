@@ -8,24 +8,26 @@ require('dotenv').config();
 
 // Load your private key from a file
 // REPLACE KEYS WITH YOURS BELOW
-const privateKey = fs.readFileSync('../fireblocks-secret-key.key');
+const privateKey = fs.readFileSync('../fireblocks-test-secret.key');
 const apiKey = process.env.API_KEY;
 
 const baseUrl = "https://api.fireblocks.io";
 const fireblocks = new FireblocksSDK(privateKey, apiKey, baseUrl, undefined, { timeoutInMs: 30000} );
-const sourceVaultId = "9";
+
+//update vault id for each run
+const sourceVaultId = "0";
 
 const addresses = [];
 
 // UPDATE TO A UNIQUE NAME
-const configName = "invictus-giga-test";
+const configName = "invictus-min";
 
 // Read the CSV file containing IDs
 //REPLACE WITH INPUT
-const inputCsv = "./invictus-addresses.csv";
+const inputCsv = "./invictus-subset-small.csv";
 
 //REPLACE WITH OUTPUT CSV FILE
-const outputInstructionSetCsv = "output-test-matic.csv";
+const outputInstructionSetCsv = "output-demo.csv";
 const outputWorkflowsCsv = "workflows.csv"
 
 const batchSize = 200; // Number of rows per batch
@@ -63,7 +65,8 @@ if (typeof fireblocks.createWorkflowConfig !== 'function') {
           "accountType": "UNMANAGED_WALLET",
         },
         "assetId": "USDC_AMOY_POLYGON_TEST_7WWV",
-        "amount": row.amount,
+        // "amount": row.amount,
+        "amount": 0.5
       });
 
       if (disburseArray.length === batchSize) {
@@ -104,6 +107,8 @@ async function processBatch(batch) {
   try {
     const workflow = await fireblocks.createWorkflowConfig(workflowName, configOperations);
     writeWorkflowStream.write(`${workflow.configId},${workflowName}\n`);
+    if (workflow.status == "VALIDATION_FAILED") 
+      console.log("validation failed for creating ", workflow.workflowName);
 
     const csvString = await output_csv(workflow, workflowName);
     writeStream.write(csvString + '\n'); // Stream to file incrementally
