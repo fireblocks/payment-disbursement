@@ -1,0 +1,86 @@
+{
+    "abi": [
+      {
+        "inputs": [
+          {
+            "internalType": "contract LinkTokenInterface",
+            "name": "_link",
+            "type": "address"
+          },
+          {
+            "internalType": "int192",
+            "name": "_minAnswer",
+            "type": "int192"
+          },
+          {
+            "internalType": "int192",
+            "name": "_maxAnswer",
+            "type": "int192"
+          },
+          {
+            "internalType": "contract AccessControllerInterface",
+            "name": "_billingAccessController",
+            "type": "address"
+          },
+          {
+            "internalType": "contract AccessControllerInterface",
+            "name": "_requesterAccessController",
+            "type": "address"
+          },
+          {
+            "internalType": "uint8",
+            "name": "_decimals",
+            "type": "uint8"
+          },
+          {
+            "internalType": "string",
+            "name": "description",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          }
+        ],
+        "name": "AddedAccess",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "int256",
+            "name": "current",
+            "type": "int256"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "roundId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "updatedAt",
+            "type": "uint256"
+          }
+        ],
+        "name": "AnswerUpdated",
+        "type": "event"
+      }
+      // ...
+      // Truncated for brevity. All other methods and events would follow the same formatting.
+    ]
+  }
+  

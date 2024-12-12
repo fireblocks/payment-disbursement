@@ -8,11 +8,11 @@ require('dotenv').config();
 
 // Load your private key from a file
 // REPLACE KEYS WITH YOURS BELOW
-const privateKey = fs.readFileSync('../fireblocks-test-secret.key');
+const privateKey = fs.readFileSync('./fireblocks-hash-3.key');
 const apiKey = process.env.API_KEY;
 
 const baseUrl = "https://api.fireblocks.io";
-const fireblocks = new FireblocksSDK(privateKey, apiKey, baseUrl, undefined, { timeoutInMs: 30000} );
+const fireblocks = new FireblocksSDK(privateKey, apiKey, baseUrl);
 
 //update vault id for each run
 const sourceVaultId = "0";
@@ -20,15 +20,15 @@ const sourceVaultId = "0";
 const addresses = [];
 
 // UPDATE TO A UNIQUE NAME
-const configName = "invictus-min";
+const configName = "eric-final-testing";
 
 // Read the CSV file containing IDs
 //REPLACE WITH INPUT
-const inputCsv = "./invictus-subset-small.csv";
+const inputCsv = "./output-FINAL.csv";
 
 //REPLACE WITH OUTPUT CSV FILE
-const outputInstructionSetCsv = "output-demo.csv";
-const outputWorkflowsCsv = "workflows.csv"
+const outputInstructionSetCsv = "Eric_PaymentWorkflow.csv";
+const outputWorkflowsCsv = "eric_Workflows.csv"
 
 const batchSize = 200; // Number of rows per batch
 let configCounter = 1; // Counter to increment config name
@@ -54,6 +54,11 @@ if (typeof fireblocks.createWorkflowConfig !== 'function') {
     .pipe(csv())
     .on('data', (row) => {
       // Store address and name in addressMap
+
+      row.address = row.address.trim().toLowerCase();
+      row.name = row.name.trim().toLowerCase().replace(/["',]/g, '');
+      row.amount = parseFloat(row.amount.replace(/[^\d.-]/g, ''));
+
       addressMap[row.id] = {
         address: row.address,
         name: row.name
@@ -65,8 +70,7 @@ if (typeof fireblocks.createWorkflowConfig !== 'function') {
           "accountType": "UNMANAGED_WALLET",
         },
         "assetId": "USDC_AMOY_POLYGON_TEST_7WWV",
-        // "amount": row.amount,
-        "amount": 0.5
+        "amount": row.amount
       });
 
       if (disburseArray.length === batchSize) {
@@ -105,6 +109,7 @@ async function processBatch(batch) {
   ];
 
   try {
+    console.log("configOperations", configOperations);
     const workflow = await fireblocks.createWorkflowConfig(workflowName, configOperations);
     writeWorkflowStream.write(`${workflow.configId},${workflowName}\n`);
     if (workflow.status == "VALIDATION_FAILED") 

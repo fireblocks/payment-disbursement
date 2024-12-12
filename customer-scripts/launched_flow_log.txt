@@ -1,8 +1,7 @@
-[2024-09-16T19:29:44.899Z] - SUCCESSFUL LAUNCH - invictus-live-fail-test-1 
-[2024-09-16T19:33:12.943Z] - ERROR IN LAUNCH - TRANSACTION_FAILED - invictus-live-fail-test-1 
-[2024-09-16T19:39:04.351Z] - SUCCESSFUL LAUNCH - invictus-live-fail-2-1 
-[2024-09-16T19:55:05.626Z] - ERROR IN LAUNCH - TRANSACTION_FAILED - invictus-live-fail-2-1 
-[2024-09-16T19:58:21.952Z] - SUCCESSFUL LAUNCH - invictus-live-fail-2-1 
-[2024-09-16T20:15:20.298Z] - SUCCESSFUL LAUNCH - invictus-live-fail-test-1 
-[2024-09-17T15:37:56.624Z] - SUCCESSFUL LAUNCH - invictus-min-1 
-[2024-09-17T15:42:11.037Z] - ERROR IN LAUNCH - TRANSACTION_FAILED - invictus-min-1 
+[2024-12-05T13:45:50.305Z] [ERROR] - Error in processRow: Request failed with status code 401
+[2024-12-05T13:45:50.320Z] [INFO] - All flow executions processed.
+[2024-12-05T13:45:51.021Z] [ERROR] - Error in processRow: Request failed with status code 401
+[2024-12-05T13:46:19.158Z] [ERROR] - Error in processRow: Request failed with status code 404
+[2024-12-05T13:46:19.173Z] [INFO] - All flow executions processed.
+[2024-12-05T13:46:20.797Z] [INFO] [Execution ID: 63611581-deb5-4f55-8394-99d59ef26db0] - Execution ID 63611581-deb5-4f55-8394-99d59ef26db0 created for workflow ID 621503f0-b45c-4e8a-9de3-32c5f5a1b8c6
+[2024-12-05T13:46:31.640Z] [INFO] [Execution ID: 63611581-deb5-4f55-8394-99d59ef26db0] - SUCCESSFUL LAUNCH - eric-final-testing-1

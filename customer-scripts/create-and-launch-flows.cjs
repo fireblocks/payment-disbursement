@@ -1,26 +1,41 @@
+// Import required modules
 const fs = require('fs');
-const axios = require('axios');
 const csv = require('csv-parser');
 const path = require('path');
-const logFilePath = path.join(__dirname, 'launched_flow_log.txt');
-
 const { FireblocksSDK } = require('fireblocks-sdk');
-
-// REPLACE KEYS WITH YOURS BELOW
-const privateKey = fs.readFileSync('../fireblocks-test-secret.key');
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 require('dotenv').config();
 
-const apiKey = process.env.API_KEY;
+// Set up your API keys and base URL
+const privateKey = fs.readFileSync('./fireblocks-hash-3.key'); // Replace with your private key path
+const apiKey = process.env.API_KEY; // Ensure your .env file contains your API_KEY
 const baseUrl = "https://api.fireblocks.io";
 const fireblocks = new FireblocksSDK(privateKey, apiKey, baseUrl);
 
-const workflowCsv = "./workflows.csv";
+// Define file paths and other constants
+const workflowCsv = "./eric_Workflows.csv"; // Path to your input CSV file
 const preScreening = { enabled: false };
-const outputFailedCsv = "./failed_txs.csv"
+const outputFailedCsv = "./failed_txs.csv"; // Path to your failed transactions CSV
+const logFilePath = path.join(__dirname, 'launched_flow_log.txt'); // Log file path
 
+// Logging utility function
+function logMessage(message, level = 'INFO', executionId = '') {
+  const timestamp = new Date().toISOString();
+  const executionInfo = executionId ? ` [Execution ID: ${executionId}]` : '';
+  const logEntry = `[${timestamp}] [${level}]${executionInfo} - ${message}\n`;
+  fs.appendFile(logFilePath, logEntry, (err) => {
+    if (err) {
+      console.error('Failed to write to log file:', err);
+    }
+  });
+}
+
+// Function to check status and launch flow execution
 const checkStatusAndLaunch = async (executionId) => {
   return new Promise((resolve, reject) => {
-    const interval = setInterval(async () => {
+    const baseInterval = 5000; // Interval between status checks in milliseconds
+
+    const intervalFunction = async () => {
       try {
         const flowExecution = await fireblocks.getFlowExecution(executionId);
         const { status, configSnapshot: { configName: name } } = flowExecution;
@@ -28,50 +43,42 @@ const checkStatusAndLaunch = async (executionId) => {
         if (status === 'READY_FOR_LAUNCH') {
           await fireblocks.launchFlowExecution(executionId);
           console.log(`Flow execution ${executionId} launched.`);
-          // Append the message to the log file with a timestamp
-          fs.appendFile(logFilePath, `[${new Date().toISOString()}] - SUCCESSFUL LAUNCH - ${name} \n`, (err) => {
-            if (err) {
-              console.error('Failed to write to log file:', err);
-            }
-          });
+          logMessage(`SUCCESSFUL LAUNCH - ${name}`, 'INFO', executionId);
         } else if (status === 'EXECUTION_COMPLETED') {
-          clearInterval(interval);
           console.log(`Flow execution ${executionId} completed.`);
-          
-          // Check and log failed transactions
-          // await checkFailedTransactions();
-          
-          resolve();
-        } else if (status === "EXECUTION_FAILED") {
-          console.log(`Failed, moving onto the next.`);
+          logMessage(`Flow execution completed - ${name}`, 'INFO', executionId);
           clearInterval(interval);
-          console.log(flowExecution.executionOperations[0].execution.failure.reason);
-
+          resolve();
+        } else if (status === 'EXECUTION_FAILED') {
+          console.log(`Flow execution ${executionId} failed.`);
           const failureReason = flowExecution.executionOperations[0]?.execution.failure?.reason || 'Unknown reason';
-          
-          fs.appendFile(logFilePath, `[${new Date().toISOString()}] - ERROR IN LAUNCH - ${failureReason} - ${name} \n`, (err) => {
-            if (err) {
-              console.error('Failed to write to log file:', err);
-            }
-          });
+          logMessage(`ERROR IN LAUNCH - ${failureReason} - ${name}`, 'ERROR', executionId);
+          clearInterval(interval);
           resolve();
         } else {
           console.log(`Current status of ${executionId}: ${status}. Checking again...`);
+          // No maxAttempts, continue checking indefinitely
         }
       } catch (error) {
+        console.error(`Error fetching execution status for ${executionId}:`, error);
+        logMessage(`Error fetching execution status: ${error.message}`, 'ERROR', executionId);
         clearInterval(interval);
-        console.error(error);
         reject(error);
       }
-    }, 4000); // Check every 3 seconds
+    };
+
+    const interval = setInterval(intervalFunction, baseInterval);
   });
 };
 
+
+// Function to check for failed transactions
 const checkFailedTransactions = async () => {
   try {
-    console.log("checking api for failed txs...");
+    console.log("Checking API for failed transactions...");
+    logMessage("Checking API for failed transactions...");
 
-    const from = Date.now() - 60 * 60 * 1000; //last hour
+    const from = Date.now() - (60 * 30 * 1000); // Transactions from the last 30 min
     const transactions = await fireblocks.getTransactions({
       status: ["FAILED", "REJECTED"],
       after: from
@@ -82,19 +89,17 @@ const checkFailedTransactions = async () => {
         path: outputFailedCsv,
         append: true,
         header: [
-          {id: 'id', title: 'ID'},
-          {id: 'status', title: 'Status'},
-          {id: 'timestamp', title: 'Timestamp'},
-          {id: 'sourceType', title: 'Source Type'},
-          {id: 'sourceId', title: 'Source ID'},
-          {id: 'destinationType', title: 'Destination Type'},
-          {id: 'destinationId', title: 'Destination Id'},
-          {id: 'amount', title: 'Amount'},
-          {id: 'assetId', title: 'Asset ID'}
+          { id: 'id', title: 'ID' },
+          { id: 'status', title: 'Status' },
+          { id: 'timestamp', title: 'Timestamp' },
+          { id: 'sourceType', title: 'Source Type' },
+          { id: 'sourceId', title: 'Source ID' },
+          { id: 'destinationType', title: 'Destination Type' },
+          { id: 'destinationId', title: 'Destination ID' },
+          { id: 'amount', title: 'Amount' },
+          { id: 'assetId', title: 'Asset ID' }
         ]
       });
-
-      console.log(transactions[0]);
 
       await csvWriter.writeRecords(transactions.map(tx => ({
         id: tx.id,
@@ -109,45 +114,60 @@ const checkFailedTransactions = async () => {
       })));
 
       console.log(`${transactions.length} failed transactions written to CSV.`);
+      logMessage(`${transactions.length} failed transactions written to CSV.`);
     } else {
       console.log('No failed transactions found.');
+      logMessage('No failed transactions found.');
     }
   } catch (error) {
     console.error('Error checking failed transactions:', error);
+    logMessage(`Error checking failed transactions: ${error.message}`, 'ERROR');
   }
 };
 
-// Don't forget to import createCsvWriter at the top of your file
-const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+// Function to process each row from the CSV
+async function processRow(row) {
+  let executionId = '';
+  try {
+    const flowExecution = await fireblocks.createFlowExecution(row.workflowId, preScreening, []);
+    executionId = flowExecution.executionId;
+    console.log(`Execution ID: ${executionId}`);
+    // fs.appendFileSync('execution-id.txt', `${executionId}\n`);
 
+    // Log the execution ID
+    logMessage(`Execution ID ${executionId} created for workflow ID ${row.workflowId}`, 'INFO', executionId);
+
+    await checkStatusAndLaunch(executionId);
+    await checkFailedTransactions();
+  } catch (error) {
+    console.error('Error creating or launching flow execution:', error);
+    logMessage(`Error in processRow: ${error.message}`, 'ERROR', executionId);
+  }
+}
+
+// Main execution function
 (async () => {
-  const rows = [];
-  
-  // Read all rows from the CSV
-  fs.createReadStream(workflowCsv)
-    .pipe(csv())
-    .on('data', (row) => {
-      rows.push(row);
-    })
-    .on('end', async () => {
-      console.log('CSV file processing completed.');
+  const stream = fs.createReadStream(workflowCsv).pipe(csv());
 
-      // Process each row sequentially
-      for (const row of rows) {
-        try {
-          // const flowExecution = await fireblocks.createFlowExecution(row.workflowId, preScreening, []);
-          // console.log('Flow execution response:', flowExecution);
-          // const executionId = flowExecution.executionId;
-          // console.log(`Execution ID: ${executionId}`);
-          // fs.writeFileSync('execution-id.txt', executionId);
+  stream.on('data', async (row) => {
+    stream.pause();
+    try {
+      await processRow(row);
+    } catch (error) {
+      console.error('Error processing row:', error);
+      logMessage(`Error processing row: ${error.message}`, 'ERROR');
+    } finally {
+      stream.resume();
+    }
+  });
 
-          // await checkStatusAndLaunch(executionId);
-          await checkFailedTransactions();
-        } catch (error) {
-          console.error('Error creating or launching flow execution:', error);
-        }
-      }
+  stream.on('end', () => {
+    console.log('All flow executions processed.');
+    logMessage('All flow executions processed.');
+  });
 
-      console.log('All flow executions processed.');
-    });
+  stream.on('error', (error) => {
+    console.error('Error reading CSV file:', error);
+    logMessage(`Error reading CSV file: ${error.message}`, 'ERROR');
+  });
 })();
